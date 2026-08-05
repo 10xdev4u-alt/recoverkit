@@ -56,28 +56,11 @@ feature/* ──PR──▶ staging ──promotion PR──▶ main ──▶ p
 
 ## CI (`.github/workflows/ci.yml`)
 
-- **Now (pre-scaffold):** `install` + `commitlint` on push to `main`/`staging` and on
-  PRs. Commit conventions are locked from day one.
-- **First scaffold PR:** add the `checks` job to the same workflow:
-
-```yaml
-  checks:
-    name: Typecheck, lint, build
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 22
-          cache: pnpm
-      - run: pnpm install --frozen-lockfile
-      - run: pnpm exec tsc --noEmit
-      - run: pnpm lint
-      - run: pnpm build
-```
-
-- Upgrade path: add coverage gate + e2e (Playwright) when the app has real flows.
+- **Full gate (live since Phase 1):** `commitlint` + `checks` (typecheck, lint,
+  build) on push to `main`/`staging` and on every PR. Anything red does not merge.
+- Job layout: `commitlint` (commit conventions) and `checks` (typecheck, lint,
+  build) — both required by branch protection.
+- Upgrade path (Phase 18): add a `test` job with coverage gate + e2e (Playwright).
 
 ## Branch protection (applied on `main` and `staging`)
 
