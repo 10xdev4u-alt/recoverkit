@@ -8,7 +8,7 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint",
+    "lint": "eslint .",
     "commitlint": "commitlint --edit",
     "commitlint:range": "commitlint --from HEAD~1 --to HEAD",
     "prepare": "husky"
@@ -26,7 +26,7 @@
     "@types/react": "^19.0.4",
     "@types/react-dom": "^19.0.2",
     "eslint": "^8.57.1",
-    "eslint-config-next": "15.1.6",
+    "eslint-config-next": "^15.1.6",
     "husky": "^9.1.7",
     "postcss": "^8.5.25",
     "tailwindcss": "^4.3.3",

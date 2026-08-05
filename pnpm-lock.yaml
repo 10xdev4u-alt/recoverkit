@@ -40,7 +40,7 @@ importers:
         specifier: ^8.57.1
         version: 8.57.1
       eslint-config-next:
-        specifier: 15.1.6
+        specifier: ^15.1.6
         version: 15.1.6(eslint@8.57.1)(typescript@5.9.3)
       husky:
         specifier: ^9.1.7
