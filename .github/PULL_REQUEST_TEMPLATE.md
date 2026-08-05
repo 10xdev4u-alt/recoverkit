@@ -8,8 +8,8 @@
 
 ## How tested
 
-- [ ] Typecheck (`pnpm exec tsc --noEmit`) — once app scaffold lands
-- [ ] Lint (`pnpm lint`) — once app scaffold lands
+- [ ] Typecheck (`pnpm exec tsc --noEmit`)
+- [ ] Lint (`pnpm lint`)
 - [ ] Manual verification (what did you try?)
 
 ## Notes
