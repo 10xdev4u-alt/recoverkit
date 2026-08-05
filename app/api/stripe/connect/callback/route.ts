@@ -1,6 +1,13 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
-import { createStripe } from "@/lib/stripe";
+import { createStripe, getStripeWebhookUrl } from "@/lib/stripe";
+
+const WEBHOOK_EVENTS = [
+  "invoice.payment_failed",
+  "invoice.payment_succeeded",
+  "customer.subscription.updated",
+  "charge.failed",
+] as const;
 
 export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
@@ -53,6 +60,24 @@ export async function GET(request: Request) {
       // Non-fatal — the connection is still recorded.
     }
 
+    // Best-effort: register a webhook endpoint on the connected account so
+    // its dunning events reach /api/webhooks/stripe (Phase 6). Non-fatal —
+    // connect still succeeds; webhook delivery can be fixed in Settings.
+    let webhookSecret: string | null = null;
+    try {
+      const webhookUrl = getStripeWebhookUrl();
+      if (webhookUrl) {
+        const connected = createStripe(oauth.access_token);
+        const endpoint = await connected?.webhookEndpoints.create({
+          url: webhookUrl,
+          enabled_events: [...WEBHOOK_EVENTS],
+        });
+        webhookSecret = endpoint?.secret ?? null;
+      }
+    } catch {
+      // Non-fatal.
+    }
+
     const { data, error: updateError } = await supabase
       .from("accounts")
       .update({
@@ -60,6 +85,7 @@ export async function GET(request: Request) {
         stripe_access_token: oauth.access_token,
         stripe_refresh_token: oauth.refresh_token ?? null,
         stripe_account_email: accountEmail,
+        stripe_webhook_secret: webhookSecret,
         connected_at: new Date().toISOString(),
       })
       .eq("id", state)
