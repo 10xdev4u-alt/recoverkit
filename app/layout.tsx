@@ -18,10 +18,8 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${gabarito.variable} bg-background font-sans text-foreground antialiased`}
-      >
+    <html lang="en" className={gabarito.variable}>
+      <body className="bg-background font-sans text-foreground antialiased">
         {children}
       </body>
     </html>
