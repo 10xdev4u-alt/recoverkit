@@ -10,7 +10,8 @@
     "start": "next start",
     "lint": "next lint",
     "commitlint": "commitlint --edit",
-    "commitlint:range": "commitlint --from HEAD~1 --to HEAD"
+    "commitlint:range": "commitlint --from HEAD~1 --to HEAD",
+    "prepare": "husky"
   },
   "dependencies": {
     "next": "^15.1.6",
@@ -23,6 +24,7 @@
     "@types/node": "^22.10.5",
     "@types/react": "^19.0.4",
     "@types/react-dom": "^19.0.2",
+    "husky": "^9.1.7",
     "typescript": "^5.7.3"
   }
 }
