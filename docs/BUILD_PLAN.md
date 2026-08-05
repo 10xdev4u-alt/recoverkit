@@ -296,7 +296,7 @@ pricing, mock dashboard, waitlist form), `app/og.png`-style visuals optional.
 **Files:** across app
 
 - [ ] Loading skeletons, optimistic UI, error boundaries
-- [ ] Rate limiting on token endpoints; audit log; safe webhook failure alerts
+- [ ] Rate limiting on token endpoints + public waitlist endpoint (per-IP limiter or Turnstile); audit log; safe webhook failure alerts
 - [ ] a11y pass (focus, contrast, labels); performance pass (Lighthouse > 90)
 - [ ] Empty states and copy polish
 
