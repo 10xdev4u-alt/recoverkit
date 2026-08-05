@@ -20,6 +20,9 @@ Format follows Keep a Changelog; versioning is SemVer.
 - Repo standards: MIT LICENSE, CONTRIBUTING, SECURITY, editorconfig,
   gitattributes, Dependabot config
 - Husky pre-commit hook enforcing commit conventions locally
+- MVP Phase 1: Next.js 15 scaffold (App Router, TypeScript, Tailwind v4, ESLint
+  flat config), CI full gate (typecheck/lint/build), 20-phase build plan
+  (`docs/BUILD_PLAN.md`)
 
 ### Updated
 - Architecture: `webhook_events` idempotency ledger + locked research decisions
