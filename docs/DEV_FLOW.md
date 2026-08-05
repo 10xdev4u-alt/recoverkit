@@ -69,9 +69,10 @@ feature/* ──PR──▶ staging ──promotion PR──▶ main ──▶ p
 - [x] Require linear history (no merge commits)
 - [x] Require branches to be up to date before merging
 - [x] Do not allow bypassing the above (admin included)
-- [ ] **Solo-dev reality check:** with admin included, the owner still needs an
-      approving review from a second GitHub account to merge. Decide: teammate
-      reviews, or relax enforce-admins and accept the tradeoff.
+- [x] **Solo-dev reality check:** with admin included, the owner still needs an
+      approving review from a second GitHub account to merge. Resolved (2026-08-06):
+      two accounts are logged in via the `gh` CLI — the owner reviews their own PRs
+      from the second account; enforce-admins stays on.
 
 ## Releases
 
