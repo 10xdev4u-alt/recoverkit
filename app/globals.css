@@ -1,12 +1,69 @@
 @import "tailwindcss";
 
 @theme {
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-display: var(--font-fraunces), ui-serif, Georgia, serif;
+  --font-sans: var(--font-instrument), ui-sans-serif, system-ui, sans-serif;
+  --font-mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, monospace;
 
-  --color-background: #09090b;
-  --color-foreground: #fafafa;
-  --color-surface: #18181b;
-  --color-muted: #a1a1aa;
-  --color-border-subtle: #27272a;
-  --color-accent: #34d399;
+  /* Ink desk — dark, warm, precise */
+  --color-background: #0b0b0c;
+  --color-foreground: #f4f3ef;
+  --color-surface: #131316;
+  --color-surface-2: #17171b;
+  --color-muted: #9a9aa3;
+  --color-border-subtle: #232328;
+
+  /* Money green + warning amber */
+  --color-accent: #c6f24e;
+  --color-accent-strong: #d8ff6b;
+  --color-accent-soft: #1c2410;
+  --color-good: #4ade80;
+  --color-bad: #f87171;
+}
+
+::selection {
+  background: var(--color-accent);
+  color: #0b0b0c;
+}
+
+body {
+  background: var(--color-background);
+  color: var(--color-foreground);
+  -webkit-font-smoothing: antialiased;
+}
+
+/* Staggered load reveal — one orchestrated entrance */
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  animation: rise 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation: none;
+  }
+}
+
+/* Fine blueprint grid behind the hero */
+.bg-grid {
+  background-image:
+    linear-gradient(to right, rgb(244 243 239 / 0.035) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(244 243 239 / 0.035) 1px, transparent 1px);
+  background-size: 44px 44px;
+  mask-image: radial-gradient(ellipse 90% 70% at 50% 0%, black 40%, transparent 100%);
+}
+
+/* Ledger numerals for money figures */
+.tnum {
+  font-variant-numeric: tabular-nums;
 }

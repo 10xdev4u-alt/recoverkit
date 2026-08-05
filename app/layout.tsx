@@ -1,16 +1,24 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Fraunces, Instrument_Sans } from "next/font/google";
 import "./globals.css";
 
-const inter = Inter({
+const fraunces = Fraunces({
   subsets: ["latin"],
-  variable: "--font-inter",
+  style: ["normal", "italic"],
+  variable: "--font-fraunces",
+  display: "swap",
+});
+
+const instrument = Instrument_Sans({
+  subsets: ["latin"],
+  variable: "--font-instrument",
+  display: "swap",
 });
 
 export const metadata: Metadata = {
-  title: "RecoverKit — failed payment recovery for indie SaaS",
+  title: "RecoverKit — never lose another failed payment",
   description:
-    "Flat $29/mo Stripe dunning: decline-code-aware emails, no-login card updates, and a dashboard that shows exactly how much MRR you saved.",
+    "Flat $29/mo Stripe dunning for indie SaaS. Decline-code-aware emails, no-login card updates, and a dashboard that shows exactly how much MRR you saved.",
 };
 
 export default function RootLayout({
@@ -19,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${inter.variable} bg-background font-sans text-foreground antialiased`}
+        className={`${fraunces.variable} ${instrument.variable} bg-background font-sans text-foreground antialiased`}
       >
         {children}
       </body>
