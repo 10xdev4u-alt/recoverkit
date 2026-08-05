@@ -28,6 +28,19 @@ jobs:
         if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
         run: pnpm exec commitlint --from ${{ github.event.before }} --to ${{ github.event.after }}
 
-  # NOTE: The typecheck / lint / build `checks` job lands with the first app
-  # scaffold commit (see docs/DEV_FLOW.md for the ready-to-paste block). It is
-  # intentionally omitted until then so CI stays green.
+  checks:
+    name: Typecheck, lint, build
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm exec tsc --noEmit
+      - run: pnpm lint
+      - run: pnpm build
