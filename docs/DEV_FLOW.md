@@ -49,8 +49,8 @@ feature/* ──PR──▶ staging ──promotion PR──▶ main ──▶ p
 
 - Types: `feat`, `fix`, `docs`, `chore`, `refactor`, `test`, `perf`, `build`, `ci`.
 - Format: `type(optional-scope): subject ≤ 6 words`
-- Enforced locally + in CI via commitlint (`commitlint.config.js`):
-  - conventional config + custom rule: **subject ≤ 6 words**
+- Enforced locally (husky pre-commit hook) + in CI via commitlint
+  (`commitlint.config.js`): conventional config + custom rule **subject ≤ 6 words**
 - Scripts: `pnpm commitlint` (last commit), `pnpm commitlint:range` (last-commit
   range `HEAD~1..HEAD` — the same range CI checks on push).
 

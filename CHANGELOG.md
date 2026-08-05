@@ -17,6 +17,9 @@ Format follows Keep a Changelog; versioning is SemVer.
 - commitlint tooling (`@commitlint/cli`, `@commitlint/config-conventional`)
 - Stage pipeline: `staging` integration branch + protection, CODEOWNERS, issue
   templates, CI coverage for staging pushes (`docs/DEV_FLOW.md`)
+- Repo standards: MIT LICENSE, CONTRIBUTING, SECURITY, editorconfig,
+  gitattributes, Dependabot config
+- Husky pre-commit hook enforcing commit conventions locally
 
 ### Updated
 - Architecture: `webhook_events` idempotency ledger + locked research decisions
