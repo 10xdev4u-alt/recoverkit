@@ -42,8 +42,12 @@ feature/* ──PR──▶ staging ──promotion PR──▶ main ──▶ p
   hours/days, one concern each, always PR → `staging`.
 - **Environments (Vercel):** PR = Preview env, `staging` branch = Staging env,
   `main` = Production. Map them in the Vercel project settings.
-- **Promotion:** a `staging` → `main` PR is deliberate and batched — merge it when
-  the batch is verified, not per-feature.
+- **Promotion (how we actually do it):** every merge is a squash, so `main` and
+  `staging` live on parallel histories — GitHub's strict up-to-date rule makes a
+  plain `staging` → `main` PR non-mergeable. Promote with a release branch:
+  branch `release/<phase>` from `main`, apply the staging tree
+  (`git checkout origin/staging -- .`), commit, PR → `main`, review, squash-merge.
+  This sidesteps pnpm-lock 3-way conflicts entirely.
 
 ## Commit conventions
 
@@ -75,7 +79,8 @@ feature/* ──PR──▶ staging ──promotion PR──▶ main ──▶ p
 
 ## Releases
 
-- A `staging` → `main` promotion PR **is** a release event. Merge it, then:
+- A `release/<phase>` promotion PR **is** a release event (see Promotion above).
+  Merge it, then:
   1. Tag it: `git tag v0.1.0 && git push --tags`
   2. `main` → Vercel auto-deploy to Production. Nothing else.
 - Urgent fixes ride the same pipeline (`fix/*` → staging → main, fast-tracked with
