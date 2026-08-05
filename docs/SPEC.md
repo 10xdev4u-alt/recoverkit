@@ -19,7 +19,7 @@ charge $29/mo flat, and prove ROI on a single dashboard.
 ## 3. Problem
 
 - 20-40% of churn is involuntary (failed cards, not willful cancel)
-- Stripe's built-in retry logic recovers ~11-15%
+- Stripe's built-in retries are passive — independent audits put recovery at ~25-35%, leaving most failed payments unrecovered (verify exact claims against Stripe docs before marketing)
 - Existing dunning tools are too expensive, MRR-scaled, or bloated with
   cancel-flow features the indie doesn't need
 

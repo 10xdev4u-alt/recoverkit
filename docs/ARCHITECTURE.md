@@ -25,7 +25,18 @@ Stripe ──webhook──▶ Next.js API route ──▶ Postgres (Supabase)
 - `customers` — id, account_id, stripe_customer_id, email
 - `failed_payments` — id, customer_id, amount, decline_code, status, attempts
 - `email_events` — id, failed_payment_id, template, sent_at, clicked_at
-- `recovery_tokens` — token, customer_id, expires_at
+- `recovery_tokens` — token_hash, customer_id, expires_at, used_at
+- `webhook_events` — event_id (PK), type, processed_at — idempotency ledger so duplicate
+  Stripe deliveries are never double-processed (see `docs/TECHNICAL.md` §4)
+
+## Decisions locked during research (see `docs/TECHNICAL.md`)
+
+- Card update page: magic-link token (hashed, 7-day TTL, single-use) + SetupIntent,
+  then attach + set default payment method + `invoice.pay()` open invoices
+- Idempotency: `webhook_events` ledger with unique `event_id`; verify
+  `Stripe-Signature` on the raw body
+- Final-failure detection: `next_payment_attempt == null` or subscription status
+  `unpaid` / `canceled`
 
 ## What we deliberately skipped (ponytail retry)
 

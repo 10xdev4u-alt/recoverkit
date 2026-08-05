@@ -10,7 +10,7 @@ that shows exactly how much MRR we saved you this month.
 
 - Involuntary churn is 20-40% of all SaaS churn (Baremetrics / Churnkey / Recurly)
 - Average SaaS loses ~9% of revenue to failed cards
-- Stripe Smart Retries alone recover only ~11-15%
+- Stripe's built-in retries alone leave most failed payments unrecovered (independent audits put passive recovery at ~25-35%)
 - The existing tools are either $200+/mo suites (Churnkey), MRR-scaled (Stunning),
   or bare-bones (ChurnWard). Nobody owns the lean, indie-friendly middle.
 
