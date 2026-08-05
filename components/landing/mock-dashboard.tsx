@@ -32,8 +32,9 @@ export function MockDashboard() {
 
   return (
     <div
-      className="relative -rotate-1 rounded-2xl border border-border-subtle bg-surface shadow-[0_24px_80px_-24px_rgb(0_0_0/0.8)]"
+      role="img"
       aria-label="RecoverKit dashboard preview: $1,240 recovered this month"
+      className="relative -rotate-1 rounded-2xl border border-border-subtle bg-surface shadow-[0_24px_80px_-24px_rgb(0_0_0/0.8)]"
     >
       {/* Window chrome */}
       <div className="flex items-center gap-2 border-b border-border-subtle px-4 py-3">
@@ -62,6 +63,11 @@ export function MockDashboard() {
             <p className="tnum font-display text-5xl font-semibold tracking-tight text-accent">
               ${recovered.toLocaleString()}
             </p>
+            <noscript>
+              <p className="tnum font-display text-5xl font-semibold tracking-tight text-accent">
+                $1,240
+              </p>
+            </noscript>
             <span className="tnum font-mono text-xs text-good">
               +12.4% vs June
             </span>

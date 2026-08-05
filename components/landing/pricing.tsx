@@ -34,7 +34,10 @@ export function Pricing() {
         <ul className="mt-6 space-y-2.5">
           {includes.map((f) => (
             <li key={f} className="flex items-start gap-2.5 text-sm">
-              <span className="mt-0.5 text-accent" aria-hidden="true">
+              <span
+                className="mt-0.5 text-accent"
+                aria-hidden="true"
+              >
                 ✓
               </span>
               <span className="text-muted">{f}</span>
