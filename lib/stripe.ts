@@ -32,3 +32,9 @@ export function getStripeRedirectUri(): string | null {
   const base = process.env.NEXT_PUBLIC_APP_URL;
   return base ? `${base}/api/stripe/connect/callback` : null;
 }
+
+/** The webhook URL per-account endpoints forward connected-account events to. */
+export function getStripeWebhookUrl(): string | null {
+  const base = process.env.NEXT_PUBLIC_APP_URL;
+  return base ? `${base}/api/webhooks/stripe` : null;
+}
