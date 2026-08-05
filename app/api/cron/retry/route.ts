@@ -7,8 +7,9 @@ import {
 } from "@/lib/scheduler";
 
 /**
- * Hourly cron (vercel.json): computes the decline-aware dunning plan for every
- * due open failed payment and marks it scheduled so nothing double-fires.
+ * Daily cron (vercel.json, `0 1 * * *` — Hobby accounts allow one run/day):
+ * computes the decline-aware dunning plan for every due open failed payment
+ * and marks it scheduled so nothing double-fires.
  *
  * Phase 10 (dunning engine) consumes `last_scheduled_at != null` records to
  * actually send the emails.
