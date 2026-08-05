@@ -1,17 +1,10 @@
 import type { Metadata } from "next";
-import { Fraunces, Instrument_Sans } from "next/font/google";
+import { Gabarito } from "next/font/google";
 import "./globals.css";
 
-const fraunces = Fraunces({
+const gabarito = Gabarito({
   subsets: ["latin"],
-  style: ["normal", "italic"],
-  variable: "--font-fraunces",
-  display: "swap",
-});
-
-const instrument = Instrument_Sans({
-  subsets: ["latin"],
-  variable: "--font-instrument",
+  variable: "--font-gabarito",
   display: "swap",
 });
 
@@ -27,7 +20,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={`${fraunces.variable} ${instrument.variable} bg-background font-sans text-foreground antialiased`}
+        className={`${gabarito.variable} bg-background font-sans text-foreground antialiased`}
       >
         {children}
       </body>
