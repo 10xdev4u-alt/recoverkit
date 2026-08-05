@@ -15,6 +15,8 @@ Format follows Keep a Changelog; versioning is SemVer.
 - Dunning email templates keyed to decline codes (`docs/EMAIL_TEMPLATES.md`)
 - Dev flow: GitHub Flow + commitlint + CI + PR template (`docs/DEV_FLOW.md`)
 - commitlint tooling (`@commitlint/cli`, `@commitlint/config-conventional`)
+- Stage pipeline: `staging` integration branch + protection, CODEOWNERS, issue
+  templates, CI coverage for staging pushes (`docs/DEV_FLOW.md`)
 
 ### Updated
 - Architecture: `webhook_events` idempotency ledger + locked research decisions
