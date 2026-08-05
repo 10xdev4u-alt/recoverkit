@@ -1,0 +1,31 @@
+name: CI
+
+"on":
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  commitlint:
+    name: Commit conventions
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Lint commits (pull request)
+        if: github.event_name == 'pull_request'
+        run: pnpm exec commitlint --from ${{ github.event.pull_request.base.sha }} --to ${{ github.event.pull_request.head.sha }}
+      - name: Lint commits (push)
+        if: github.event_name == 'push' && github.event.before != '0000000000000000000000000000000000000000'
+        run: pnpm exec commitlint --from ${{ github.event.before }} --to ${{ github.event.after }}
+
+  # NOTE: The typecheck / lint / build `checks` job lands with the first app
+  # scaffold commit (see docs/DEV_FLOW.md for the ready-to-paste block). It is
+  # intentionally omitted until then so CI stays green.
