@@ -6,6 +6,7 @@ import {
   getStripeWebhookSecret,
 } from "@/lib/stripe-webhooks";
 import { handleWebhookEvent } from "@/lib/recovery";
+import { logAudit } from "@/lib/audit";
 
 /**
  * Stripe webhook endpoint.
@@ -64,7 +65,30 @@ export async function POST(request: Request) {
   }
 
   // Dispatch first — throws bubble up as 500 so Stripe retries.
-  await handleWebhookEvent(event, supabase);
+  try {
+    await handleWebhookEvent(event, supabase);
+  } catch (dispatchError) {
+    // Phase 19: alert the account owner via the audit trail, then rethrow so
+    // Stripe retries (dispatch is idempotent and converges on retry).
+    const accountId = await resolveAccountId(stripeAccountHeader, supabase);
+    if (accountId) {
+      await logAudit(supabase, {
+        accountId,
+        actor: "stripe",
+        action: "webhook.dispatch_failed",
+        entityType: "stripe_event",
+        entityId: event.id,
+        meta: {
+          type: event.type,
+          error:
+            dispatchError instanceof Error
+              ? dispatchError.message
+              : String(dispatchError),
+        },
+      });
+    }
+    throw dispatchError;
+  }
 
   // Record after dispatch; ON CONFLICT DO NOTHING makes concurrent
   // duplicate deliveries safe. A failed ledger write returns 500 so Stripe
@@ -116,4 +140,18 @@ async function resolveSecret(
   }
 
   return getStripeWebhookSecret();
+}
+
+/** Resolve our internal account uuid for a connected Stripe account id. */
+async function resolveAccountId(
+  stripeAccountHeader: string | null,
+  supabase: NonNullable<ReturnType<typeof createServerClient>>,
+): Promise<string | null> {
+  if (!stripeAccountHeader) return null;
+  const { data } = await supabase
+    .from("accounts")
+    .select("id")
+    .eq("stripe_account_id", stripeAccountHeader)
+    .maybeSingle();
+  return data?.id ?? null;
 }

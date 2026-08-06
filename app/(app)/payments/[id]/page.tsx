@@ -140,6 +140,22 @@ export default async function PaymentDetailPage({
             />
           ))}
 
+          {(emailEvents ?? []).length === 0 && detail.status === "open" && (
+            <li className="relative flex gap-4 pb-8">
+              <div className="flex flex-col items-center">
+                <span className="mt-1.5 h-2.5 w-2.5 rounded-full bg-muted/40" aria-hidden="true" />
+                <span className="w-px flex-1 bg-border-subtle" aria-hidden="true" />
+              </div>
+              <div className="pb-1">
+                <p className="text-sm font-semibold">Awaiting first dunning email</p>
+                <p className="mt-0.5 text-sm text-muted">
+                  RecoverKit will reach out to this customer on its next
+                  scheduled run.
+                </p>
+              </div>
+            </li>
+          )}
+
           <TimelineItem
             date={detail.updated_at}
             title={
