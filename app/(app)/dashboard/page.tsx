@@ -8,6 +8,7 @@ import {
   fetchRecentPayments,
 } from "@/lib/stats";
 import { DeclineBadge } from "@/components/dashboard/decline-badge";
+import { SetupChecklist } from "@/components/dashboard/setup-checklist";
 import { formatAmount } from "@/lib/dunning-helpers";
 
 export const dynamic = "force-dynamic";
@@ -32,6 +33,21 @@ export default async function DashboardPage() {
     );
   }
 
+  // Phase 22: setup-checklist state — Stripe linked, sender configured,
+  // any recovery already recorded.
+  const { data: setupRow } = await supabase
+    .from("accounts")
+    .select("stripe_account_id, dunning_from_email, dunning_support_email")
+    .eq("id", account.id)
+    .maybeSingle();
+  const setup = {
+    stripeConnected: Boolean(setupRow?.stripe_account_id),
+    emailConfigured: Boolean(
+      setupRow?.dunning_from_email || setupRow?.dunning_support_email,
+    ),
+    hasRecovered: false,
+  } as const;
+
   // List window (latest 50) + exact aggregates over ALL open payments — at-risk
   // MRR and open count must not undercount when there are 50+ failures.
   const recent = await fetchRecentPayments(supabase, account.id);
@@ -41,6 +57,13 @@ export default async function DashboardPage() {
     ...listStats,
     atRiskCents: open.reduce((acc, p) => acc + p.amount_due, 0),
     openCount: open.length,
+  };
+
+  // A resolved (non-open) payment counts as a recovery — at least the flow
+  // has completed once, so the checklist's third step is done.
+  const setupState = {
+    ...setup,
+    hasRecovered: listStats.resolvedCount > 0,
   };
 
   return (
@@ -77,6 +100,11 @@ export default async function DashboardPage() {
         />
         <MetricCard label="Open failures" value={String(stats.openCount)} />
       </div>
+
+      {/* Phase 22: guided setup until the account is fully wired */}
+      {(!setupState.stripeConnected ||
+        !setupState.emailConfigured ||
+        !setupState.hasRecovered) && <SetupChecklist state={setupState} />}
 
       {/* Payments list */}
       <section className="mt-10">
