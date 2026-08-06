@@ -159,5 +159,21 @@ export async function GET(request: Request) {
     }
   }
 
+  // Phase 20: monitoring — ping the configured endpoint so uptime services
+  // can alert when the daily cron stops running. Best-effort, non-fatal.
+  const monitoringUrl = process.env.MONITORING_URL;
+  if (monitoringUrl) {
+    try {
+      await fetch(monitoringUrl, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ sent: sent.length, nudged: nudged.length }),
+        signal: AbortSignal.timeout(5_000),
+      });
+    } catch {
+      // Non-fatal — the cron result stands on its own.
+    }
+  }
+
   return NextResponse.json({ sent: sent.length, nudged: nudged.length, results });
 }
