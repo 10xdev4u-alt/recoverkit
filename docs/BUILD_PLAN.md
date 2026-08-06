@@ -308,11 +308,11 @@ pricing, mock dashboard, waitlist form), `app/og.png`-style visuals optional.
 
 **Files:** `vercel.json`, env maps, runbooks in `docs/RUNBOOK.md`
 
-- [ ] Map Vercel envs: Preview (PRs), Staging (`staging`), Production (`main`)
-- [ ] Deploy both branches; verify webhook endpoint + cron on staging
-- [ ] Monitoring: webhook failure alerts, cron success pings
-- [ ] Launch checklist: pricing page live, $29/mo, Stripe test→live keys
-- [ ] Tag `v0.2.0`
+- [x] Map Vercel envs: Preview (PRs), Staging (`staging`), Production (`main`)
+- [x] Deploy both branches; verify webhook endpoint + cron on staging
+- [x] Monitoring: webhook failure alerts, cron success pings
+- [x] Launch checklist: pricing page live, $29/mo, Stripe test→live keys
+- [x] Tag `v0.2.0`
 
 **Exit criteria:** a new account goes Connect → dunning → dashboard in one sitting.
 
