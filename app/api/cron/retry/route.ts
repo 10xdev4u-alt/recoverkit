@@ -6,6 +6,7 @@ import {
   isNudgeDue,
   sendDunningEmail,
 } from "@/lib/dunning";
+import { logAudit } from "@/lib/audit";
 
 /**
  * Daily cron (vercel.json, `0 1 * * *` — Hobby accounts allow one run/day):
@@ -100,6 +101,17 @@ export async function GET(request: Request) {
 
     results.push({ failedPaymentId: payment.id, ok, reason });
     if (ok) sent.push(payment.id);
+    else if (reason) {
+      // Phase 19: surface send failures so an operator can investigate.
+      await logAudit(supabase, {
+        accountId: customer.account_id,
+        actor: "system",
+        action: "dunning.send_failed",
+        entityType: "failed_payment",
+        entityId: payment.id,
+        meta: { reason, customerEmail: customer.email },
+      });
+    }
   }
 
   // Nudge pass: first email sent >48h ago, link never clicked → re-send.
