@@ -1,4 +1,6 @@
-import { createServerClient } from "@/lib/supabase/server";
+import { redirect } from "next/navigation";
+import { createUserClient } from "@/lib/supabase/ssr";
+import { resolveAccount } from "@/lib/account";
 
 export const dynamic = "force-dynamic";
 
@@ -21,16 +23,25 @@ export default async function SettingsPage({
 }) {
   const { connect } = await searchParams;
 
-  const supabase = createServerClient();
-  let account: AccountRow | null = null;
-  if (supabase) {
-    const { data } = await supabase
-      .from("accounts")
-      .select("stripe_account_id, stripe_account_email, connected_at")
-      .limit(1)
-      .maybeSingle();
-    account = (data as AccountRow | null) ?? null;
-  }
+  const supabase = await createUserClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) redirect("/sign-in");
+
+  const resolved = await resolveAccount(
+    supabase,
+    user.id,
+    user.email ?? undefined,
+  );
+  if (!resolved) redirect("/sign-in");
+
+  const { data } = await supabase
+    .from("accounts")
+    .select("stripe_account_id, stripe_account_email, connected_at")
+    .eq("id", resolved.id)
+    .maybeSingle();
+  const account = (data as AccountRow | null) ?? null;
 
   const connected = Boolean(account?.stripe_account_id);
   const banner = connect ? BANNERS[connect] : undefined;
