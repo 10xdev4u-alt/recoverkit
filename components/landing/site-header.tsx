@@ -52,12 +52,20 @@ export function SiteHeader() {
           </a>
         </nav>
 
-        <a
-          href="#waitlist"
-          className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-background transition-all hover:bg-accent-strong hover:shadow-[0_0_24px_rgb(198_242_78/0.35)]"
-        >
-          Join the waitlist
-        </a>
+        <div className="flex items-center gap-2">
+          <a
+            href="/sign-in"
+            className="hidden rounded-full border border-border-subtle px-4 py-2 text-sm font-semibold transition-colors hover:bg-surface-2 sm:inline-flex"
+          >
+            Sign in
+          </a>
+          <a
+            href="/dashboard"
+            className="rounded-full bg-accent px-4 py-2 text-sm font-semibold text-background transition-all hover:bg-accent-strong hover:shadow-[0_0_24px_rgb(198_242_78/0.35)]"
+          >
+            Get started
+          </a>
+        </div>
       </div>
     </header>
   );

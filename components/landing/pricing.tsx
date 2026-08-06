@@ -46,7 +46,25 @@ export function Pricing() {
         </ul>
 
         <div className="mt-7">
-          <WaitlistForm id="pricing" />
+          <a
+            href="/dashboard"
+            className="inline-flex h-12 w-full items-center justify-center rounded-full bg-accent px-6 text-sm font-semibold text-background transition-all hover:bg-accent-strong active:scale-[0.98]"
+          >
+            Start recovering
+          </a>
+          <p className="mt-3 text-center text-xs text-muted">
+            Product&apos;s live — sign in and connect Stripe in 5 minutes.
+          </p>
+          <div className="mt-6 flex items-center gap-3">
+            <span className="h-px flex-1 bg-border-subtle" aria-hidden="true" />
+            <span className="text-[10px] uppercase tracking-widest text-muted/70">
+              or join the waitlist
+            </span>
+            <span className="h-px flex-1 bg-border-subtle" aria-hidden="true" />
+          </div>
+          <div className="mt-4">
+            <WaitlistForm id="pricing" />
+          </div>
         </div>
 
         <p className="mt-5 text-center font-mono text-[10px] uppercase tracking-widest text-muted/70">
