@@ -14,12 +14,9 @@ importers:
       '@react-email/render':
         specifier: ^2.1.0
         version: 2.1.0(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@stripe/react-stripe-js':
-        specifier: ^6.8.0
-        version: 6.8.0(@stripe/stripe-js@9.13.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
-      '@stripe/stripe-js':
-        specifier: ^9.13.0
-        version: 9.13.0
+      '@supabase/ssr':
+        specifier: ^0.12.4
+        version: 0.12.4(@supabase/supabase-js@2.112.1)
       '@supabase/supabase-js':
         specifier: ^2.112.1
         version: 2.112.1
@@ -800,17 +797,6 @@ packages:
   '@standard-schema/spec@1.1.0':
     resolution: {integrity: sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w==}
 
-  '@stripe/react-stripe-js@6.8.0':
-    resolution: {integrity: sha512-nRrPkos00CmUeqXHxtJkXmSbl9/6ybGI4jVebzsiA6QaE5A4iw9dn1C4hUx2tBmQQV2e6pm2aLkPYov4hdta2w==}
-    peerDependencies:
-      '@stripe/stripe-js': '>=9.5.0 <10.0.0'
-      react: '>=16.8.0 <20.0.0'
-      react-dom: '>=16.8.0 <20.0.0'
-
-  '@stripe/stripe-js@9.13.0':
-    resolution: {integrity: sha512-/0c72BUgzzVkVTlsw5uBn8x3waTdVJ/PZGfQ6jY1eu6K7olUPf4d9lgDPA9/0sIdsR8j7o3QIG8fOCO6ItcL7A==}
-    engines: {node: '>=12.16'}
-
   '@supabase/auth-js@2.112.1':
     resolution: {integrity: sha512-TBacB69YXSYYFFet9ISgNC2jsPExFPIWngmzeLHAWrp/xvKWfYIyhh0nyvDLryi8WP6KoexkXO9kRF6Y9oBUTA==}
     engines: {node: '>=22.0.0'}
@@ -873,6 +859,11 @@ packages:
   '@supabase/realtime-js@2.112.1':
     resolution: {integrity: sha512-jp5TgXXTb1m2rqF6kiirOhVnvAoFHrjj7ZHOzWRa+SL+Am0BbcMcQr6FyHkJJS1ngw0TAL2DeymfGgKkSanN0A==}
     engines: {node: '>=22.0.0'}
+
+  '@supabase/ssr@0.12.4':
+    resolution: {integrity: sha512-xHzcgI8cC1TpBKSwJcR5Yd8CCwfIq0SBc5yb4yz/YFw5tbCrEQ0QT3a+2jymCxHgQWLfzwN93HZ6eRbcoMkOlA==}
+    peerDependencies:
+      '@supabase/supabase-js': ^2.111.0
 
   '@supabase/storage-js@2.112.1':
     resolution: {integrity: sha512-FHKAQTw4KUV9nF3bnOLvZvjB3bkmtl6ltavlJfdJKdabvqMtQQ2iyBliFyp2dSHMCn9qA8c6WoZoRkgV5nxAmg==}
@@ -1394,6 +1385,10 @@ packages:
 
   convert-source-map@2.0.0:
     resolution: {integrity: sha512-Kvp459HrV2FEJ1CAsi1Ku+MY3kasH19TFykTz2xWmMeq6bk2NU3XXvfJ+Q61m0xktWwt+1HSYf3JZsTms3aRJg==}
+
+  cookie@1.1.1:
+    resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
+    engines: {node: '>=18'}
 
   cosmiconfig-typescript-loader@6.3.0:
     resolution: {integrity: sha512-Akr82WH1Wfqatyiqpj8HDkO2o2KmJRu1FhKfSNJP3K4IdXwHfEyL7MOb62i1AGQVLtIQM+iCE9CGOtrfhR+mmA==}
@@ -3478,15 +3473,6 @@ snapshots:
 
   '@standard-schema/spec@1.1.0': {}
 
-  '@stripe/react-stripe-js@6.8.0(@stripe/stripe-js@9.13.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)':
-    dependencies:
-      '@stripe/stripe-js': 9.13.0
-      prop-types: 15.8.1
-      react: 19.2.8
-      react-dom: 19.2.8(react@19.2.8)
-
-  '@stripe/stripe-js@9.13.0': {}
-
   '@supabase/auth-js@2.112.1':
     dependencies:
       tslib: 2.8.1
@@ -3529,6 +3515,11 @@ snapshots:
     dependencies:
       '@supabase/phoenix': 0.4.5
       tslib: 2.8.1
+
+  '@supabase/ssr@0.12.4(@supabase/supabase-js@2.112.1)':
+    dependencies:
+      '@supabase/supabase-js': 2.112.1
+      cookie: 1.1.1
 
   '@supabase/storage-js@2.112.1':
     dependencies:
@@ -4040,6 +4031,8 @@ snapshots:
       argue-cli: 3.1.0
 
   convert-source-map@2.0.0: {}
+
+  cookie@1.1.1: {}
 
   cosmiconfig-typescript-loader@6.3.0(@types/node@22.20.1)(cosmiconfig@9.0.2(typescript@5.9.3))(typescript@5.9.3):
     dependencies:
