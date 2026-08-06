@@ -52,7 +52,8 @@ export function WaitlistForm({ id = "landing" }: { id?: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="w-full max-w-md">
+    // noValidate: we own the error message (native bubbles are unstylable).
+    <form onSubmit={onSubmit} noValidate className="w-full max-w-md">
       <div className="flex flex-col gap-3 sm:flex-row">
         <label className="sr-only" htmlFor={`email-${id}`}>
           Email address

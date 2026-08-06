@@ -23,6 +23,13 @@ export default function SignInPage() {
     setLoading(true);
     setError(null);
 
+    // Not configured (e.g. CI): surface a readable state instead of crashing.
+    if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+      setLoading(false);
+      setError("Sign-in isn't configured yet — check back soon.");
+      return;
+    }
+
     const supabase = createBrowserSupabase();
     const { error: sendError } = await supabase.auth.signInWithOtp({
       email,
