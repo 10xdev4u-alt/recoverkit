@@ -27,7 +27,10 @@ export function WaitlistForm({ id = "landing" }: { id?: string }) {
         const data = (await res.json().catch(() => ({}))) as {
           error?: string;
         };
-        if (data.error === "Waitlist is not configured yet") {
+        if (
+          data.error === "Waitlist is not configured yet" ||
+          res.status === 429
+        ) {
           setState("server-error");
         } else {
           setState("error");
@@ -52,7 +55,8 @@ export function WaitlistForm({ id = "landing" }: { id?: string }) {
   }
 
   return (
-    <form onSubmit={onSubmit} className="w-full max-w-md">
+    // noValidate: we own the error message (native bubbles are unstylable).
+    <form onSubmit={onSubmit} noValidate className="w-full max-w-md">
       <div className="flex flex-col gap-3 sm:flex-row">
         <label className="sr-only" htmlFor={`email-${id}`}>
           Email address
@@ -79,12 +83,12 @@ export function WaitlistForm({ id = "landing" }: { id?: string }) {
         </button>
       </div>
       {state === "error" && (
-        <p className="mt-2 pl-4 text-xs text-bad">
+        <p className="mt-2 pl-4 text-xs text-bad" role="alert">
           That email doesn&apos;t look right — mind checking it?
         </p>
       )}
       {state === "server-error" && (
-        <p className="mt-2 pl-4 text-xs text-bad">
+        <p className="mt-2 pl-4 text-xs text-bad" role="alert">
           Couldn&apos;t reach the signup service — try again in a moment.
         </p>
       )}

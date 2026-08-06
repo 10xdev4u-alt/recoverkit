@@ -1,10 +1,17 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { clientIp, rateLimit } from "@/lib/rate-limit";
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 const SOURCES = new Set(["landing", "hero", "pricing"]);
 
 export async function POST(request: Request) {
+  // Phase 19: throttle signup spam — 5 submissions/IP/hour + 3 per address.
+  const ip = clientIp(request);
+  if (!rateLimit(`waitlist:ip:${ip}`, 5, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
+  }
+
   let body: unknown;
   try {
     body = await request.json();
@@ -22,6 +29,10 @@ export async function POST(request: Request) {
   // RFC 5321 max address length is 254; cap here to keep the DB tight.
   if (!EMAIL_RE.test(normalized) || normalized.length > 254) {
     return NextResponse.json({ error: "A valid email is required" }, { status: 400 });
+  }
+
+  if (!rateLimit(`waitlist:email:${normalized}`, 3, 60 * 60 * 1000)) {
+    return NextResponse.json({ error: "Too many attempts" }, { status: 429 });
   }
 
   const source =

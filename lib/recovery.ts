@@ -25,7 +25,8 @@ export interface FailedPaymentRecord {
   amountDue: number;
   attemptCount: number;
   declineCode: string | null;
-  status: "open" | "paid";
+  /** Matches failed_payments.status check constraint (open | paid | void | uncollectible). */
+  status: "open" | "paid" | "void" | "uncollectible";
   nextPaymentAttempt: string | null;
   /** charge.failed doesn't know Stripe's retry schedule — preserve existing. */
   setNextAttempt: boolean;
@@ -178,7 +179,8 @@ async function resolveAccountRow(
   return created;
 }
 
-async function ensureCustomer(
+/** Export shared with lib/backfill.ts (Phase 17). */
+export async function ensureCustomer(
   supabase: SupabaseClient,
   accountId: string,
   stripeCustomerId: string,
@@ -203,7 +205,8 @@ async function ensureCustomer(
   return existing.id;
 }
 
-async function callUpsert(
+/** Export shared with lib/backfill.ts (Phase 17). */
+export async function callUpsert(
   supabase: SupabaseClient,
   record: FailedPaymentRecord,
 ): Promise<void> {
