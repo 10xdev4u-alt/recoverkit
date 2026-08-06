@@ -1,6 +1,8 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
 import { createStripe, getStripeWebhookUrl } from "@/lib/stripe";
+import { backfillFailedPayments } from "@/lib/backfill";
+import { logAudit } from "@/lib/audit";
 
 const WEBHOOK_EVENTS = [
   "invoice.payment_failed",
@@ -92,6 +94,30 @@ export async function GET(request: Request) {
       .select("id")
       .single();
     if (updateError || !data) throw new Error("Could not save connection");
+
+    // Phase 19: audit the connection (and any non-fatal steps we skipped).
+    await logAudit(supabase, {
+      accountId: state,
+      actor: "user",
+      action: "stripe.connect",
+      entityType: "stripe_account",
+      entityId: oauth.stripe_user_id,
+      meta: {
+        accountEmail,
+        webhookRegistered: Boolean(webhookSecret),
+      },
+    });
+
+    // Phase 17: seed history from recent failed/open invoices so the dashboard
+    // is populated immediately. Best-effort — connect succeeds regardless.
+    try {
+      const connected = createStripe(oauth.access_token);
+      if (connected) {
+        await backfillFailedPayments(supabase, state, connected);
+      }
+    } catch {
+      // Non-fatal — webhooks will fill history as events arrive.
+    }
 
     return NextResponse.redirect(
       new URL("/settings?connect=success", base),

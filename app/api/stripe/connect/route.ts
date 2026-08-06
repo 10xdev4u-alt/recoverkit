@@ -1,39 +1,19 @@
 import { NextResponse } from "next/server";
-import type { SupabaseClient } from "@supabase/supabase-js";
 import { createServerClient } from "@/lib/supabase/server";
+import { createUserClient } from "@/lib/supabase/ssr";
+import { resolveAccount } from "@/lib/account";
 import {
   createStripe,
   getStripeClientId,
   getStripeRedirectUri,
 } from "@/lib/stripe";
 
-/**
- * A single default account until dashboard auth lands (Phase 14).
- * TODO(phase 14): resolve the account from the authenticated session instead.
- */
-async function getDefaultAccountId(supabase: SupabaseClient): Promise<string> {
-  const { data, error } = await supabase
-    .from("accounts")
-    .select("id")
-    .limit(1)
-    .maybeSingle();
-  if (error) throw error;
-  if (data) return data.id;
-
-  const { data: created, error: createError } = await supabase
-    .from("accounts")
-    .insert({ name: "RecoverKit" })
-    .select("id")
-    .single();
-  if (createError) throw createError;
-  return created.id;
-}
-
 export async function GET() {
   const stripe = createStripe();
   const clientId = getStripeClientId();
   const redirectUri = getStripeRedirectUri();
   const supabase = createServerClient();
+  const userSupabase = await createUserClient();
 
   if (!stripe || !clientId || !redirectUri) {
     return NextResponse.json(
@@ -49,7 +29,28 @@ export async function GET() {
   }
 
   try {
-    const state = await getDefaultAccountId(supabase);
+    // Phase 14: the OAuth state is the authenticated user's account id.
+    const {
+      data: { user },
+    } = await userSupabase.auth.getUser();
+    if (!user) {
+      return NextResponse.redirect(
+        new URL("/sign-in", process.env.NEXT_PUBLIC_APP_URL ?? ""),
+        303,
+      );
+    }
+    const account = await resolveAccount(
+      userSupabase,
+      user.id,
+      user.email ?? undefined,
+    );
+    if (!account) {
+      return NextResponse.json(
+        { error: "Could not resolve your account" },
+        { status: 500 },
+      );
+    }
+    const state = account.id;
     const url = stripe.oauth.authorizeUrl({
       response_type: "code",
       client_id: clientId,
