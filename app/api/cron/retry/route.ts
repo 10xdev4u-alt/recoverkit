@@ -1,18 +1,21 @@
 import { NextResponse } from "next/server";
 import { createServerClient } from "@/lib/supabase/server";
+import { selectDuePayments, type FailedPaymentRow } from "@/lib/scheduler";
 import {
-  planAction,
-  selectDuePayments,
-  type FailedPaymentRow,
-} from "@/lib/scheduler";
+  getDunningState,
+  isNudgeDue,
+  sendDunningEmail,
+} from "@/lib/dunning";
 
 /**
  * Daily cron (vercel.json, `0 1 * * *` — Hobby accounts allow one run/day):
- * computes the decline-aware dunning plan for every due open failed payment
- * and marks it scheduled so nothing double-fires.
- *
- * Phase 10 (dunning engine) consumes `last_scheduled_at != null` records to
- * actually send the emails.
+ *  1. computes the decline-aware dunning plan for every due open failed
+ *     payment and SENDS the email (Phase 10 — mints a magic-link token +
+ *     persists the 'sent' event),
+ *  2. nudges payments whose update link was never clicked 48h after the
+ *     first email,
+ * and only locks the records we actually acted on so nothing double-fires
+ * but failures retry next run.
  */
 export async function GET(request: Request) {
   // Vercel Cron sends `Authorization: Bearer $CRON_SECRET` when configured.
@@ -45,20 +48,96 @@ export async function GET(request: Request) {
 
   const now = new Date();
   const due = selectDuePayments((payments ?? []) as FailedPaymentRow[], now);
-  const actions = due.map((p) => ({
-    failedPaymentId: p.id,
-    ...planAction(p),
-  }));
 
-  // Lock: mark scheduled so the next hourly run skips these.
-  if (actions.length > 0) {
+  const sent: string[] = [];
+  const results: Array<{
+    failedPaymentId: string;
+    ok: boolean;
+    reason?: string;
+  }> = [];
+
+  for (const payment of due) {
+    // First-email-only rule: the due pass sends the FIRST email per payment
+    // (on the decline-code delay). Re-sends are owned by the nudge pass below
+    // (48h no-click). Without this, a daily cron re-emails every open payment
+    // every day, ignoring whether the customer already clicked or updated.
+    const state = await getDunningState(supabase, payment.id);
+    if (state.lastSentAt !== null) {
+      results.push({
+        failedPaymentId: payment.id,
+        ok: false,
+        reason: "already_emailed",
+      });
+      continue;
+    }
+
+    // Resolve the customer (and their account) for this payment.
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("id, email, account_id")
+      .eq("id", payment.customer_id)
+      .maybeSingle();
+    if (!customer) {
+      results.push({
+        failedPaymentId: payment.id,
+        ok: false,
+        reason: "no_customer",
+      });
+      continue;
+    }
+
+    const { ok, reason } = await sendDunningEmail(
+      supabase,
+      {
+        id: payment.id,
+        amount_due: payment.amount_due,
+        decline_code: payment.decline_code,
+        status: payment.status,
+      },
+      { id: customer.id, email: customer.email },
+      customer.account_id,
+    );
+
+    results.push({ failedPaymentId: payment.id, ok, reason });
+    if (ok) sent.push(payment.id);
+  }
+
+  // Nudge pass: first email sent >48h ago, link never clicked → re-send.
+  const nudged: string[] = [];
+  const nudgeSkip = new Set(sent);
+  for (const payment of payments ?? []) {
+    if (nudgeSkip.has(payment.id) || payment.status !== "open") continue;
+    const state = await getDunningState(supabase, payment.id);
+    if (!isNudgeDue(state, now)) continue;
+
+    const { data: customer } = await supabase
+      .from("customers")
+      .select("id, email, account_id")
+      .eq("id", payment.customer_id)
+      .maybeSingle();
+    if (!customer) continue;
+
+    const { ok } = await sendDunningEmail(
+      supabase,
+      {
+        id: payment.id,
+        amount_due: payment.amount_due,
+        decline_code: payment.decline_code,
+        status: payment.status,
+      },
+      { id: customer.id, email: customer.email },
+      customer.account_id,
+    );
+    if (ok) nudged.push(payment.id);
+  }
+
+  // Lock only the records we emailed — failed sends retry on the next run.
+  const locked = [...sent, ...nudged];
+  if (locked.length > 0) {
     const { error: lockError } = await supabase
       .from("failed_payments")
       .update({ last_scheduled_at: now.toISOString() })
-      .in(
-        "id",
-        actions.map((a) => a.failedPaymentId),
-      )
+      .in("id", locked)
       .eq("status", "open");
     if (lockError) {
       return NextResponse.json(
@@ -68,5 +147,5 @@ export async function GET(request: Request) {
     }
   }
 
-  return NextResponse.json({ scheduled: actions.length, actions });
+  return NextResponse.json({ sent: sent.length, nudged: nudged.length, results });
 }
