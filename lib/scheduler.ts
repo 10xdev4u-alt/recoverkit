@@ -22,6 +22,8 @@ export type SchedulerAction =
 
 export interface FailedPaymentRow {
   id: string;
+  customer_id: string;
+  amount_due: number;
   status: string;
   decline_code: string | null;
   created_at: string;
