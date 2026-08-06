@@ -73,7 +73,12 @@ export async function findToken(
     status: string;
     decline_code: string | null;
   } | null;
-  customer: { email: string } | null;
+  customer: {
+    id: string;
+    email: string;
+    stripe_customer_id: string;
+    account_id: string;
+  } | null;
 } | null> {
   const { data: token } = await supabase
     .from("recovery_tokens")
@@ -93,7 +98,11 @@ export async function findToken(
           .eq("id", token.failed_payment_id)
           .maybeSingle()
       : { data: null },
-    supabase.from("customers").select("email").eq("id", token.customer_id).maybeSingle(),
+    supabase
+      .from("customers")
+      .select("id, email, stripe_customer_id, account_id")
+      .eq("id", token.customer_id)
+      .maybeSingle(),
   ]);
 
   return {
