@@ -8,6 +8,12 @@ export const dynamic = "force-dynamic";
 export default async function AppLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
+  // Not configured (e.g. CI): there are no sessions to serve — bounce to
+  // sign-in instead of crashing on client creation.
+  if (!process.env.NEXT_PUBLIC_SUPABASE_URL || !process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY) {
+    redirect("/sign-in");
+  }
+
   const supabase = await createUserClient();
   const {
     data: { user },
