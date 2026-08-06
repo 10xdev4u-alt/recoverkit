@@ -10,6 +10,7 @@ import {
   formatDate,
   type DunningState,
 } from "@/lib/dunning-helpers";
+import type { TemplateOverrides } from "@/lib/template-store";
 
 export { isNudgeDue, NUDGE_WINDOW_MS } from "@/lib/dunning-helpers";
 export type { DunningState } from "@/lib/dunning-helpers";
@@ -75,24 +76,63 @@ export function defaultBranding(accountName: string | null): DunningBranding {
 /* Send                                                                */
 /* ------------------------------------------------------------------ */
 
-interface AccountNameRow {
+interface AccountRow {
   name: string | null;
+  dunning_from_email: string | null;
+  dunning_reply_to: string | null;
+  dunning_support_email: string | null;
 }
 
 async function resolveBranding(
   supabase: SupabaseClient,
   accountId: string | null,
 ): Promise<DunningBranding> {
-  let name: string | null = null;
   if (accountId) {
     const { data } = await supabase
       .from("accounts")
-      .select("name")
+      .select(
+        "name, dunning_from_email, dunning_reply_to, dunning_support_email",
+      )
       .eq("id", accountId)
       .maybeSingle();
-    name = (data as AccountNameRow | null)?.name ?? null;
+    const row = data as AccountRow | null;
+    const base = defaultBranding(row?.name ?? null);
+    return {
+      product: base.product,
+      fromEmail: row?.dunning_from_email ?? base.fromEmail,
+      replyTo: row?.dunning_reply_to ?? base.replyTo,
+      supportEmail: row?.dunning_support_email ?? base.supportEmail,
+      appUrl: base.appUrl,
+    };
   }
-  return defaultBranding(name);
+  return defaultBranding(null);
+}
+
+interface AccountContext {
+  branding: DunningBranding;
+  overrides: TemplateOverrides;
+}
+
+/**
+ * Fetch branding + template overrides for an account in ONE query (the cron
+ * loop calls this per payment — keep DB round-trips down).
+ */
+async function resolveAccountContext(
+  supabase: SupabaseClient,
+  accountId: string | null,
+): Promise<AccountContext> {
+  const branding = await resolveBranding(supabase, accountId);
+  if (!accountId) return { branding, overrides: {} };
+
+  const { data } = await supabase
+    .from("accounts")
+    .select("template_overrides")
+    .eq("id", accountId)
+    .maybeSingle();
+  const raw = (data as { template_overrides: unknown } | null)?.template_overrides;
+  const overrides =
+    raw && typeof raw === "object" ? (raw as TemplateOverrides) : {};
+  return { branding, overrides };
 }
 
 /**
@@ -111,13 +151,19 @@ export async function sendDunningEmail(
     return { ok: false, template: null, reason: "not_open" };
   }
 
-  const branding = await resolveBranding(supabase, accountId);
+  const { branding, overrides } = await resolveAccountContext(
+    supabase,
+    accountId,
+  );
   const policy = getRetryPolicy(payment.decline_code);
   const template: EmailTemplateKey = policy.emailTemplate;
 
   // Mint a fresh magic-link token (single-use, 7-day TTL).
   const token = await createRecoveryToken(supabase, customer.id, payment.id);
   if (!token) return { ok: false, template, reason: "token_error" };
+
+  // Phase 16: apply the merchant's saved copy overrides (subject + intro).
+  const override = overrides[template];
 
   const updateUrl = buildUpdateUrl(branding.appUrl, token.raw);
   const ctx = {
@@ -127,13 +173,15 @@ export async function sendDunningEmail(
     date: formatDate(new Date()),
     updateUrl,
     supportEmail: branding.supportEmail,
+    customSubject: override?.subject,
+    customIntro: override?.body,
   };
 
   const { data, error } = await resend.emails.send({
     from: `Billing at ${branding.product} <${branding.fromEmail}>`,
     replyTo: branding.replyTo,
     to: [customer.email],
-    subject: pickSubject(template, branding.product),
+    subject: pickSubject(template, branding.product, override?.subject),
     html: await renderTemplate(template, ctx),
   });
   if (error) return { ok: false, template, reason: `send_error: ${error.name}` };

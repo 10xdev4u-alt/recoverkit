@@ -20,6 +20,10 @@ export interface EmailContext {
   date: string;
   updateUrl: string;
   supportEmail: string;
+  /** Merchant-edited subject override (Phase 16); undefined = default. */
+  customSubject?: string;
+  /** Merchant-edited intro line override (Phase 16); undefined = default. */
+  customIntro?: string;
 }
 
 export async function renderTemplate(
@@ -36,6 +40,7 @@ export async function renderTemplate(
           date: ctx.date,
           updateUrl: ctx.updateUrl,
           supportEmail: ctx.supportEmail,
+          customIntro: ctx.customIntro,
         }),
       );
     case "insufficient_funds":
@@ -46,6 +51,7 @@ export async function renderTemplate(
           amount: ctx.amount,
           date: ctx.date,
           updateUrl: ctx.updateUrl,
+          customIntro: ctx.customIntro,
         }),
       );
     case "generic":
@@ -57,6 +63,7 @@ export async function renderTemplate(
           date: ctx.date,
           updateUrl: ctx.updateUrl,
           supportEmail: ctx.supportEmail,
+          customIntro: ctx.customIntro,
         }),
       );
   }
