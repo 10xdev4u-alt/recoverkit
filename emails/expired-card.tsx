@@ -9,6 +9,8 @@ export interface ExpiredCardEmailProps {
   date: string;
   updateUrl: string;
   supportEmail: string;
+  /** Merchant-edited intro override (Phase 16). */
+  customIntro?: string;
 }
 
 /**
@@ -22,6 +24,7 @@ export function ExpiredCardEmail({
   amount,
   date,
   updateUrl,
+  customIntro,
 }: ExpiredCardEmailProps) {
   return (
     <EmailLayout
@@ -29,10 +32,14 @@ export function ExpiredCardEmail({
       preview="It takes 30 seconds, and nothing about your plan changes."
     >
       <Text style={greeting}>Hey {firstName ?? "there"},</Text>
-      <Text style={body}>
-        We tried to charge <strong>{amount}</strong> for your {product} plan on{" "}
-        {date}, but the card we have on file has expired.
-      </Text>
+      {customIntro ? (
+        <Text style={body}>{customIntro}</Text>
+      ) : (
+        <Text style={body}>
+          We tried to charge <strong>{amount}</strong> for your {product} plan on{" "}
+          {date}, but the card we have on file has expired.
+        </Text>
+      )}
       <Text style={body}>It takes about 30 seconds to fix:</Text>
 
       <Section style={{ textAlign: "center" }}>
