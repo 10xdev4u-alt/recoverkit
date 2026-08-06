@@ -11,6 +11,8 @@ const HOUR = 3_600_000;
 function payment(overrides: Partial<FailedPaymentRow> = {}): FailedPaymentRow {
   return {
     id: "fp_1",
+    customer_id: "cus_1",
+    amount_due: 2900,
     status: "open",
     decline_code: null,
     created_at: "2026-08-06T00:00:00.000Z",
