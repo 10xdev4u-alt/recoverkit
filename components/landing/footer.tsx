@@ -31,9 +31,17 @@ export function Footer() {
             — failed payment recovery that pays for itself.
           </span>
         </p>
-        <p className="font-mono text-[11px] uppercase tracking-widest text-muted">
-          © 2026 RecoverKit · MIT licensed · made for indie SaaS
-        </p>
+        <div className="flex items-center gap-5 text-sm">
+          <a
+            href="/sign-in"
+            className="text-muted transition-colors hover:text-foreground"
+          >
+            Sign in
+          </a>
+          <span className="font-mono text-[11px] uppercase tracking-widest text-muted">
+            © 2026 RecoverKit · MIT licensed · made for indie SaaS
+          </span>
+        </div>
       </div>
     </footer>
   );
