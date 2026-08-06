@@ -34,11 +34,13 @@ export default async function DashboardPage() {
   }
 
   // Phase 22: setup-checklist state — Stripe linked, sender configured,
-  // any recovery already recorded. One extra accounts read, merged with the
-  // resolved-payment count below.
+  // any recovery already recorded. Phase 23: plan_status rides the same read
+  // so the dashboard can show the current entitlement.
   const { data: setupRow } = await supabase
     .from("accounts")
-    .select("stripe_account_id, dunning_from_email, dunning_support_email")
+    .select(
+      "stripe_account_id, dunning_from_email, dunning_support_email, plan_status",
+    )
     .eq("id", account.id)
     .maybeSingle();
 
@@ -65,15 +67,21 @@ export default async function DashboardPage() {
 
   return (
     <main className="mx-auto w-full max-w-6xl px-6 py-10">
-      <p className="font-mono text-xs uppercase tracking-widest text-accent">
-        {account.name}
-      </p>
-      <h1 className="mt-2 font-display text-4xl font-medium tracking-tight">
-        Revenue protection
-      </h1>
-      <p className="mt-2 text-sm text-muted">
-        The failed payments RecoverKit recovered — and the ones still in play.
-      </p>
+      <div className="flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <p className="font-mono text-xs uppercase tracking-widest text-accent">
+            {account.name}
+          </p>
+          <h1 className="mt-2 font-display text-4xl font-medium tracking-tight">
+            Revenue protection
+          </h1>
+          <p className="mt-2 text-sm text-muted">
+            The failed payments RecoverKit recovered — and the ones still in
+            play.
+          </p>
+        </div>
+        <PlanBadge status={setupRow?.plan_status ?? null} />
+      </div>
 
       {/* Metric cards */}
       <div className="mt-8 grid grid-cols-2 gap-4 lg:grid-cols-4">
@@ -155,6 +163,26 @@ export default async function DashboardPage() {
         )}
       </section>
     </main>
+  );
+}
+
+function PlanBadge({ status }: { status: string | null }) {
+  const active = status === "active" || status === "trialing";
+  return (
+    <a
+      href="/settings"
+      className={`inline-flex items-center gap-2 rounded-full border px-3 py-1.5 text-xs font-semibold transition-colors ${
+        active
+          ? "border-good/30 bg-good/10 text-good hover:bg-good/20"
+          : "border-border-subtle bg-surface text-muted hover:bg-surface-2"
+      }`}
+    >
+      <span
+        className={`h-1.5 w-1.5 rounded-full ${active ? "bg-good" : "bg-muted/50"}`}
+        aria-hidden="true"
+      />
+      {active ? "Pro" : "Free plan"}
+    </a>
   );
 }
 
