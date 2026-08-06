@@ -8,6 +8,8 @@ export interface InsufficientFundsEmailProps {
   amount: string;
   date: string;
   updateUrl: string;
+  /** Merchant-edited intro override (Phase 16). */
+  customIntro?: string;
 }
 
 /**
@@ -21,6 +23,7 @@ export function InsufficientFundsEmail({
   amount,
   date,
   updateUrl,
+  customIntro,
 }: InsufficientFundsEmailProps) {
   return (
     <EmailLayout
@@ -28,11 +31,15 @@ export function InsufficientFundsEmail({
       preview="Happens all the time. Here's what to do (30 seconds)."
     >
       <Text style={greeting}>Hey {firstName ?? "there"},</Text>
-      <Text style={body}>
-        We tried to charge <strong>{amount}</strong> for your {product} plan on{" "}
-        {date}, but the card on file didn&apos;t have enough available funds at
-        the time.
-      </Text>
+      {customIntro ? (
+        <Text style={body}>{customIntro}</Text>
+      ) : (
+        <Text style={body}>
+          We tried to charge <strong>{amount}</strong> for your {product} plan on{" "}
+          {date}, but the card on file didn&apos;t have enough available funds at
+          the time.
+        </Text>
+      )}
       <Text style={body}>
         No stress — this happens all the time. Two easy options:
       </Text>

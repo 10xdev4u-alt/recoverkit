@@ -9,6 +9,8 @@ export interface GenericDeclineEmailProps {
   date: string;
   updateUrl: string;
   supportEmail: string;
+  /** Merchant-edited intro override (Phase 16). */
+  customIntro?: string;
 }
 
 /**
@@ -23,6 +25,7 @@ export function GenericDeclineEmail({
   date,
   updateUrl,
   supportEmail,
+  customIntro,
 }: GenericDeclineEmailProps) {
   return (
     <EmailLayout
@@ -30,10 +33,14 @@ export function GenericDeclineEmail({
       preview="Your card was declined by your bank. Here's the fastest fix."
     >
       <Text style={greeting}>Hey {firstName ?? "there"},</Text>
-      <Text style={body}>
-        We had trouble charging <strong>{amount}</strong> for your {product}{" "}
-        plan on {date} — the card on file was declined by your bank.
-      </Text>
+      {customIntro ? (
+        <Text style={body}>{customIntro}</Text>
+      ) : (
+        <Text style={body}>
+          We had trouble charging <strong>{amount}</strong> for your {product}{" "}
+          plan on {date} — the card on file was declined by your bank.
+        </Text>
+      )}
       <Text style={body}>
         This is often just a temporary block. The fastest fix is updating your
         payment method:

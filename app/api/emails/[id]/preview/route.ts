@@ -13,10 +13,14 @@ const TEMPLATES = ["expired_card", "insufficient_funds", "generic"] as const;
  * customers receive. Renders static sample copy.
  */
 export async function GET(
-  _request: Request,
+  request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
+  const search = new URL(request.url).searchParams;
+  // Optional merchant copy overrides (Phase 16): /preview?subject=...&intro=...
+  const customSubject = search.get("subject") ?? undefined;
+  const customIntro = search.get("intro") ?? undefined;
   const ctx = {
     product: "Your store",
     firstName: "Jordan",
@@ -24,6 +28,8 @@ export async function GET(
     date: "Aug 6, 2026",
     updateUrl: "https://yourstore.com/recover/token",
     supportEmail: "support@yourstore.com",
+    customSubject,
+    customIntro,
   };
 
   let html: string;
