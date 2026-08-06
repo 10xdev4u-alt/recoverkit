@@ -45,8 +45,8 @@ export function SetupChecklist({
       copy: state.hasRecovered
         ? "RecoverKit has already saved you money."
         : "When a payment fails, we email the customer a no-login card update link automatically.",
-      href: "/payments",
-      cta: state.hasRecovered ? "View" : "See how it works",
+      href: "/dashboard",
+      cta: state.hasRecovered ? "View dashboard" : "See how it works",
     },
   ];
 

@@ -34,19 +34,13 @@ export default async function DashboardPage() {
   }
 
   // Phase 22: setup-checklist state — Stripe linked, sender configured,
-  // any recovery already recorded.
+  // any recovery already recorded. One extra accounts read, merged with the
+  // resolved-payment count below.
   const { data: setupRow } = await supabase
     .from("accounts")
     .select("stripe_account_id, dunning_from_email, dunning_support_email")
     .eq("id", account.id)
     .maybeSingle();
-  const setup = {
-    stripeConnected: Boolean(setupRow?.stripe_account_id),
-    emailConfigured: Boolean(
-      setupRow?.dunning_from_email || setupRow?.dunning_support_email,
-    ),
-    hasRecovered: false,
-  } as const;
 
   // List window (latest 50) + exact aggregates over ALL open payments — at-risk
   // MRR and open count must not undercount when there are 50+ failures.
@@ -62,7 +56,10 @@ export default async function DashboardPage() {
   // A resolved (non-open) payment counts as a recovery — at least the flow
   // has completed once, so the checklist's third step is done.
   const setupState = {
-    ...setup,
+    stripeConnected: Boolean(setupRow?.stripe_account_id),
+    emailConfigured: Boolean(
+      setupRow?.dunning_from_email || setupRow?.dunning_support_email,
+    ),
     hasRecovered: listStats.resolvedCount > 0,
   };
 
