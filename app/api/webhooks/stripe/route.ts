@@ -6,6 +6,7 @@ import {
   getStripeWebhookSecret,
 } from "@/lib/stripe-webhooks";
 import { handleWebhookEvent } from "@/lib/recovery";
+import { handleBillingWebhookEvent } from "@/lib/billing";
 import { logAudit } from "@/lib/audit";
 
 /**
@@ -65,8 +66,15 @@ export async function POST(request: Request) {
   }
 
   // Dispatch first — throws bubble up as 500 so Stripe retries.
+  // Connected-account deliveries (event.account set) are merchant dunning
+  // events; platform deliveries are RecoverKit's own billing events.
+  const isConnectedDelivery = Boolean(event.account ?? stripeAccountHeader);
   try {
-    await handleWebhookEvent(event, supabase);
+    if (isConnectedDelivery) {
+      await handleWebhookEvent(event, supabase);
+    } else {
+      await handleBillingWebhookEvent(event, supabase);
+    }
   } catch (dispatchError) {
     // Phase 19: alert the account owner via the audit trail, then rethrow so
     // Stripe retries (dispatch is idempotent and converges on retry).
